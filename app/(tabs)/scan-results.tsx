@@ -1,17 +1,24 @@
 import React from 'react';
 import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { Link, useRouter, useLocalSearchParams } from 'expo-router';
+
+interface SearchParams {
+  imageUri?: string;
+  species?: string;
+  confidence?: string;
+}
 
 export default function ScanResultsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<SearchParams>();
   
-  // Mock data - in real app this would come from API/state
+  // Fallback data if params are not provided
   const speciesData = {
-    name: 'Red-tailed Hawk',
+    name: params.species || 'Red-tailed Hawk',
     scientificName: 'Buteo jamaicensis',
     conservationStatus: 'Least Concern',
-    image: 'https://example.com/hawk.jpg',
+    image: params.imageUri || 'https://example.com/hawk.jpg',
     quickFacts: [
       { title: 'Diet', content: 'Small mammals, birds' },
       { title: 'Lifespan', content: '10-15 years' },
@@ -61,7 +68,7 @@ export default function ScanResultsScreen() {
 
         <View style={styles.disclaimer}>
           <Text style={styles.disclaimerText}>
-            AI-powered identification with 95% confidence
+            AI-powered identification with {params.confidence || 95}% confidence
           </Text>
         </View>
       </View>

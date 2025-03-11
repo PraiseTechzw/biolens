@@ -1,46 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
-import { Camera } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+
+type CameraViewType = React.ElementRef<typeof CameraView>;
 
 export default function HomeScreen() {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [camera, setCamera] = useState<Camera | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const [confidence, setConfidence] = useState(0);
+  const cameraRef = useRef<CameraViewType>(null);
+  const router = useRouter();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-
-  const handleCapture = async () => {
-    if (!camera) return;
-    setIsScanning(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setIsScanning(false);
-      setConfidence(95);
-      // Navigate to results screen
-    }, 2000);
-  };
-
-  if (hasPermission === null) {
+  if (!permission) {
     return <View />;
   }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text>No access to camera</Text>
+        <TouchableOpacity onPress={requestPermission}>
+          <Text>Grant Permission</Text>
+        </TouchableOpacity>
+      </View>
+    );
   }
+
+  const handleCapture = async () => {
+    if (!cameraRef.current) return;
+    
+    setIsScanning(true);
+    try {
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 1,
+        base64: true,
+      });
+
+      if (!photo) {
+        throw new Error('Failed to take picture');
+      }
+
+      // In a real app, you would send the photo.base64 to your AI service
+      // For now, we'll simulate processing
+      setTimeout(() => {
+        setIsScanning(false);
+        setConfidence(95);
+        router.push({
+          pathname: '/scan-results',
+          params: {
+            imageUri: photo.uri,
+            species: 'Red-tailed Hawk', // This would come from AI in real app
+            confidence: 95,
+          }
+        });
+      }, 2000);
+    } catch (error) {
+      console.error('Error taking picture:', error);
+      setIsScanning(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Camera
+      <CameraView
+        ref={cameraRef}
         style={styles.camera}
-        ref={(ref) => setCamera(ref)}
-        type={Camera.Constants.Type.back}
+        facing="back"
+        onMountError={(error) => console.error('Camera mount error:', error)}
       >
         <View style={styles.header}>
           <Link href="/settings" asChild>
@@ -73,7 +101,7 @@ export default function HomeScreen() {
             <View style={styles.captureButtonInner} />
           </TouchableOpacity>
         </View>
-      </Camera>
+      </CameraView>
     </View>
   );
 }

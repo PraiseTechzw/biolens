@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   return (
@@ -8,9 +8,8 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#2196F3',
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
-          height: 60,
-          paddingBottom: 10,
-          paddingTop: 10,
+          backgroundColor: '#fff',
+          borderTopColor: '#eee',
         },
         headerShown: false,
       }}
@@ -18,28 +17,27 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Camera',
+          title: 'Scan',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="camera" size={size} color={color} />
+            <MaterialCommunityIcons name="camera" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="scan-results"
+        name="collection"
         options={{
-          title: 'Results',
+          title: 'Collection',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
+            <MaterialCommunityIcons name="book-open-variant" size={size} color={color} />
           ),
-          href: null, // Hide this tab from the tab bar
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="learn"
         options={{
-          title: 'Profile',
+          title: 'Learn',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons name="school" size={size} color={color} />
           ),
         }}
       />
@@ -50,7 +48,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),
-          href: null, // Hide this tab from the tab bar
         }}
       />
     </Tabs>
