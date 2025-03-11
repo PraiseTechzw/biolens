@@ -1,200 +1,219 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  useColorScheme,
+  Dimensions,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-interface SpeciesData {
+interface SpeciesDetails {
+  id: number;
   name: string;
   scientificName: string;
-  imageUri: string;
   description: string;
+  image: string;
+  category: string;
   habitat: string;
-  diet: string;
-  behavior: string;
-  conservation: {
+  distribution: string;
+  characteristics: string[];
+  conservationStatus: {
     status: string;
-    threats: string[];
-    actions: string[];
+    color: string;
   };
   funFacts: string[];
-  sightings: {
-    total: number;
-    recent: number;
-    nearbyLocations: string[];
-  };
 }
 
-export default function SpeciesDetailsScreen() {
-  const router = useRouter();
-  const params = useLocalSearchParams<{ species: string; imageUri: string }>();
-  const [activeTab, setActiveTab] = useState<'overview' | 'habitat' | 'behavior' | 'conservation'>('overview');
-
-  // Mock data - in a real app, this would come from an API based on the species parameter
-  const speciesData: SpeciesData = {
-    name: params.species || 'Red-tailed Hawk',
-    scientificName: 'Buteo jamaicensis',
-    imageUri: params.imageUri || 'https://example.com/hawk.jpg',
-    description: 'The Red-tailed Hawk is one of North America\'s most common and widespread hawks. Known for its brick-red tail, this species is often seen soaring over open fields or perched on poles and fence posts.',
-    habitat: 'Red-tailed Hawks can be found in various habitats across North America, from deserts to tropical rainforests. They prefer open areas with high perches for hunting, including woodlands, grasslands, mountains, plains, and roadsides.',
-    diet: 'Small mammals (mice, rabbits), birds, reptiles',
-    behavior: 'Red-tailed Hawks are skilled hunters that use their keen eyesight to spot prey from high perches or while soaring. They are monogamous and often mate for life, performing spectacular aerial courtship displays. These hawks are territorial and will defend their nesting areas against other raptors.',
-    conservation: {
-      status: 'Least Concern',
-      threats: [
-        'Habitat loss due to urban development',
-        'Vehicle collisions',
-        'Pesticide exposure',
-      ],
-      actions: [
-        'Habitat protection and restoration',
-        'Monitoring of populations',
-        'Public education about raptor conservation',
-      ],
+// Mock data - in a real app, this would come from an API
+const speciesData: Record<string, SpeciesDetails> = {
+  "1": {
+    id: 1,
+    name: "Giant Sequoia",
+    scientificName: "Sequoiadendron giganteum",
+    description: "The Giant Sequoia is one of the largest and longest-living tree species on Earth, capable of reaching heights over 300 feet.",
+    image: "https://images.unsplash.com/photo-1503785640985-f62e3aeee448",
+    category: "Trees",
+    habitat: "Native to the western Sierra Nevada mountains of California",
+    distribution: "Sierra Nevada, California, USA",
+    characteristics: [
+      "Can grow to heights of 300+ feet",
+      "Trunk diameter can exceed 30 feet",
+      "Bark can be up to 3 feet thick",
+      "Can live for over 3,000 years",
+    ],
+    conservationStatus: {
+      status: "Endangered",
+      color: "#FF5252",
     },
     funFacts: [
-      'Can spot a mouse from 100 feet in the air',
-      'Mated pairs often hunt together',
-      'Can live up to 20 years in the wild',
+      "The largest tree on Earth by volume is a Giant Sequoia",
+      "Their bark contains natural fire-resistant chemicals",
+      "They rely on forest fires to reproduce",
     ],
-    sightings: {
-      total: 1247,
-      recent: 15,
-      nearbyLocations: [
-        'Central Park',
-        'Prospect Park',
-        'Van Cortlandt Park',
-      ],
+  },
+  "2": {
+    id: 2,
+    name: "Venus Flytrap",
+    scientificName: "Dionaea muscipula",
+    description: "The Venus Flytrap is a carnivorous plant that catches prey using a trapping structure formed by the terminal portion of each leaf.",
+    image: "https://images.unsplash.com/photo-1515689917361-d41c8e411ea8",
+    category: "Plants",
+    habitat: "Wet pine savannas",
+    distribution: "Native to North and South Carolina",
+    characteristics: [
+      "Traps close in about half a second",
+      "Each trap has sensitive trigger hairs",
+      "Can only close a few times before the leaf dies",
+      "Digestion takes 5-12 days",
+    ],
+    conservationStatus: {
+      status: "Vulnerable",
+      color: "#FFA726",
     },
-  };
+    funFacts: [
+      "They can count! They only close after two trigger hair stimulations",
+      "They can grow up to 6 inches in diameter",
+      "Charles Darwin called it 'the most wonderful plant in the world'",
+    ],
+  },
+};
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'overview':
-        return (
-          <View>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{speciesData.description}</Text>
-            
-            <Text style={styles.sectionTitle}>Diet</Text>
-            <Text style={styles.description}>{speciesData.diet}</Text>
-
-            <Text style={styles.sectionTitle}>Fun Facts</Text>
-            {speciesData.funFacts.map((fact, index) => (
-              <View key={index} style={styles.factItem}>
-                <MaterialCommunityIcons name="star" size={20} color="#FFD700" />
-                <Text style={styles.factText}>{fact}</Text>
-              </View>
-            ))}
-          </View>
-        );
-      
-      case 'habitat':
-        return (
-          <View>
-            <Text style={styles.sectionTitle}>Natural Habitat</Text>
-            <Text style={styles.description}>{speciesData.habitat}</Text>
-
-            <Text style={styles.sectionTitle}>Recent Sightings</Text>
-            <View style={styles.sightingsStats}>
-              <View style={styles.statBox}>
-                <Text style={styles.statNumber}>{speciesData.sightings.total}</Text>
-                <Text style={styles.statLabel}>Total Sightings</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statNumber}>{speciesData.sightings.recent}</Text>
-                <Text style={styles.statLabel}>This Month</Text>
-              </View>
-            </View>
-
-            <Text style={styles.sectionTitle}>Nearby Locations</Text>
-            {speciesData.sightings.nearbyLocations.map((location, index) => (
-              <View key={index} style={styles.locationItem}>
-                <Ionicons name="location" size={20} color="#2196F3" />
-                <Text style={styles.locationText}>{location}</Text>
-              </View>
-            ))}
-          </View>
-        );
-      
-      case 'behavior':
-        return (
-          <View>
-            <Text style={styles.sectionTitle}>Behavior Patterns</Text>
-            <Text style={styles.description}>{speciesData.behavior}</Text>
-          </View>
-        );
-      
-      case 'conservation':
-        return (
-          <View>
-            <View style={styles.statusContainer}>
-              <Text style={styles.statusLabel}>Conservation Status</Text>
-              <View style={[styles.statusBadge, { backgroundColor: '#4CAF50' }]}>
-                <Text style={styles.statusText}>{speciesData.conservation.status}</Text>
-              </View>
-            </View>
-
-            <Text style={styles.sectionTitle}>Threats</Text>
-            {speciesData.conservation.threats.map((threat, index) => (
-              <View key={index} style={styles.listItem}>
-                <MaterialCommunityIcons name="alert" size={20} color="#FF5252" />
-                <Text style={styles.listText}>{threat}</Text>
-              </View>
-            ))}
-
-            <Text style={styles.sectionTitle}>Conservation Actions</Text>
-            {speciesData.conservation.actions.map((action, index) => (
-              <View key={index} style={styles.listItem}>
-                <MaterialCommunityIcons name="shield-check" size={20} color="#4CAF50" />
-                <Text style={styles.listText}>{action}</Text>
-              </View>
-            ))}
-          </View>
-        );
-    }
-  };
+export default function SpeciesDetailsScreen() {
+  const { id } = useLocalSearchParams();
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const [isFavorite, setIsFavorite] = useState(false);
+  
+  const species = speciesData[id as string];
+  
+  if (!species) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Species not found</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.shareButton}>
-          <Ionicons name="share-outline" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView>
-        <Image source={{ uri: speciesData.imageUri }} style={styles.image} />
+    <View style={[
+      styles.container,
+      { backgroundColor: isDark ? '#121212' : '#fff' }
+    ]}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Image
+          source={{ uri: species.image }}
+          style={styles.image}
+        />
         
-        <View style={styles.infoContainer}>
-          <View style={styles.titleContainer}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={[styles.backButton, { backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)' }]}
+            onPress={() => router.back()}
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={24}
+              color={isDark ? '#fff' : '#000'}
+            />
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.favoriteButton, { backgroundColor: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.8)' }]}
+            onPress={() => setIsFavorite(!isFavorite)}
+          >
+            <MaterialCommunityIcons
+              name={isFavorite ? 'heart' : 'heart-outline'}
+              size={24}
+              color={isFavorite ? '#FF5252' : (isDark ? '#fff' : '#000')}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.titleSection}>
             <View>
-              <Text style={styles.speciesName}>{speciesData.name}</Text>
-              <Text style={styles.scientificName}>{speciesData.scientificName}</Text>
+              <Text style={[
+                styles.name,
+                { color: isDark ? '#fff' : '#000' }
+              ]}>{species.name}</Text>
+              <Text style={styles.scientificName}>{species.scientificName}</Text>
             </View>
-            <TouchableOpacity style={styles.favoriteButton}>
-              <Ionicons name="heart-outline" size={24} color="#FF4081" />
-            </TouchableOpacity>
+            <View style={[
+              styles.statusBadge,
+              { backgroundColor: species.conservationStatus.color }
+            ]}>
+              <Text style={styles.statusText}>{species.conservationStatus.status}</Text>
+            </View>
           </View>
 
-          <View style={styles.tabs}>
-            {(['overview', 'habitat', 'behavior', 'conservation'] as const).map((tab) => (
-              <TouchableOpacity
-                key={tab}
-                style={[styles.tab, activeTab === tab && styles.activeTab]}
-                onPress={() => setActiveTab(tab)}
-              >
-                <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </Text>
-              </TouchableOpacity>
+          <View style={styles.section}>
+            <Text style={[
+              styles.sectionTitle,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>Description</Text>
+            <Text style={[
+              styles.description,
+              { color: isDark ? '#aaa' : '#666' }
+            ]}>{species.description}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={[
+              styles.sectionTitle,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>Characteristics</Text>
+            {species.characteristics.map((characteristic, index) => (
+              <View key={index} style={styles.characteristicItem}>
+                <MaterialCommunityIcons name="circle-medium" size={24} color="#2E7D32" />
+                <Text style={[
+                  styles.characteristicText,
+                  { color: isDark ? '#aaa' : '#666' }
+                ]}>{characteristic}</Text>
+              </View>
             ))}
           </View>
 
-          <View style={styles.content}>
-            {renderTabContent()}
+          <View style={styles.section}>
+            <Text style={[
+              styles.sectionTitle,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>Habitat & Distribution</Text>
+            <Text style={[
+              styles.description,
+              { color: isDark ? '#aaa' : '#666' }
+            ]}>
+              <Text style={{ fontWeight: '600' }}>Habitat: </Text>
+              {species.habitat}
+            </Text>
+            <Text style={[
+              styles.description,
+              { color: isDark ? '#aaa' : '#666' }
+            ]}>
+              <Text style={{ fontWeight: '600' }}>Distribution: </Text>
+              {species.distribution}
+            </Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={[
+              styles.sectionTitle,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>Fun Facts</Text>
+            {species.funFacts.map((fact, index) => (
+              <View key={index} style={styles.factItem}>
+                <MaterialCommunityIcons name="star" size={20} color="#2E7D32" />
+                <Text style={[
+                  styles.factText,
+                  { color: isDark ? '#aaa' : '#666' }
+                ]}>{fact}</Text>
+              </View>
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -202,9 +221,9 @@ export default function SpeciesDetailsScreen() {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.arButton}
-          onPress={() => router.push('/(tabs)/ar-view')}
+          onPress={() => router.push('/ar-view')}
         >
-          <MaterialCommunityIcons name="augmented-reality" size={24} color="#fff" />
+          <MaterialCommunityIcons name="cube-scan" size={24} color="#fff" />
           <Text style={styles.arButtonText}>View in AR</Text>
         </TouchableOpacity>
       </View>
@@ -215,172 +234,121 @@ export default function SpeciesDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
   },
-  backButton: {
-    padding: 8,
-  },
-  shareButton: {
-    padding: 8,
+  errorText: {
+    fontSize: 18,
+    color: '#666',
   },
   image: {
     width: '100%',
     height: 300,
   },
-  infoContainer: {
-    flex: 1,
-    padding: 20,
-  },
-  titleContainer: {
+  header: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  favoriteButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    padding: 20,
+  },
+  titleSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 20,
   },
-  speciesName: {
+  name: {
     fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 4,
   },
   scientificName: {
     fontSize: 16,
-    color: '#666',
+    color: '#2E7D32',
     fontStyle: 'italic',
-  },
-  favoriteButton: {
-    padding: 8,
-  },
-  tabs: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#2196F3',
-  },
-  tabText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  activeTabText: {
-    color: '#2196F3',
-    fontWeight: 'bold',
-  },
-  content: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-  },
-  factItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  factText: {
-    fontSize: 16,
-    marginLeft: 10,
-    flex: 1,
-  },
-  sightingsStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 20,
-  },
-  statBox: {
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: 15,
-    borderRadius: 10,
-    minWidth: 120,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2196F3',
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  locationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  locationText: {
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginVertical: 10,
-  },
-  statusLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 15,
+    borderRadius: 12,
   },
   statusText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
-  listItem: {
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  characteristicItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  listText: {
+  characteristicText: {
     fontSize: 16,
-    marginLeft: 10,
     flex: 1,
+  },
+  factItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    paddingRight: 20,
+  },
+  factText: {
+    fontSize: 16,
+    flex: 1,
+    marginLeft: 8,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   arButton: {
+    backgroundColor: '#2E7D32',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 10,
+    padding: 16,
+    borderRadius: 12,
   },
   arButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 10,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 }); 

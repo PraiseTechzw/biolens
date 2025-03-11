@@ -1,310 +1,287 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, TextInput } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  useColorScheme,
+  FlatList,
+  Dimensions,
+} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Link } from 'expo-router';
 
 interface Category {
-  id: string;
+  id: number;
   name: string;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  icon: string;
   count: number;
 }
 
-interface FeaturedSpecies {
-  id: string;
+interface Species {
+  id: number;
   name: string;
   scientificName: string;
-  imageUri: string;
+  image: string;
   category: string;
-  distance: string;
 }
 
+const categories: Category[] = [
+  { id: 1, name: 'Plants', icon: 'flower', count: 150 },
+  { id: 2, name: 'Trees', icon: 'tree', count: 80 },
+  { id: 3, name: 'Flowers', icon: 'flower-tulip', count: 120 },
+  { id: 4, name: 'Fungi', icon: 'mushroom', count: 45 },
+  { id: 5, name: 'Mosses', icon: 'grass', count: 30 },
+  { id: 6, name: 'Algae', icon: 'water', count: 25 },
+];
+
+const featuredSpecies: Species[] = [
+  {
+    id: 1,
+    name: 'Giant Sequoia',
+    scientificName: 'Sequoiadendron giganteum',
+    image: 'https://images.unsplash.com/photo-1503785640985-f62e3aeee448',
+    category: 'Trees',
+  },
+  {
+    id: 2,
+    name: 'Venus Flytrap',
+    scientificName: 'Dionaea muscipula',
+    image: 'https://images.unsplash.com/photo-1515689917361-d41c8e411ea8',
+    category: 'Plants',
+  },
+];
+
 export default function ExploreScreen() {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
-  const categories: Category[] = [
-    { id: '1', name: 'Birds', icon: 'bird', count: 150 },
-    { id: '2', name: 'Plants', icon: 'flower', count: 200 },
-    { id: '3', name: 'Insects', icon: 'bug', count: 120 },
-    { id: '4', name: 'Mammals', icon: 'dog', count: 80 },
-    { id: '5', name: 'Reptiles', icon: 'snake', count: 50 },
-    { id: '6', name: 'Fish', icon: 'fish', count: 90 },
-  ];
+  const renderCategoryItem = ({ item }: { item: Category }) => (
+    <TouchableOpacity
+      style={[
+        styles.categoryCard,
+        { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+      ]}
+    >
+      <MaterialCommunityIcons
+        name={item.icon}
+        size={32}
+        color="#2E7D32"
+      />
+      <Text style={[
+        styles.categoryName,
+        { color: isDark ? '#fff' : '#000' }
+      ]}>{item.name}</Text>
+      <Text style={styles.categoryCount}>{item.count} species</Text>
+    </TouchableOpacity>
+  );
 
-  const featuredSpecies: FeaturedSpecies[] = [
-    {
-      id: '1',
-      name: 'Red-tailed Hawk',
-      scientificName: 'Buteo jamaicensis',
-      imageUri: 'https://example.com/hawk.jpg',
-      category: 'Birds',
-      distance: '2.5 km',
-    },
-    {
-      id: '2',
-      name: 'Monarch Butterfly',
-      scientificName: 'Danaus plexippus',
-      imageUri: 'https://example.com/butterfly.jpg',
-      category: 'Insects',
-      distance: '1.8 km',
-    },
-  ];
+  const renderFeaturedItem = ({ item }: { item: Species }) => (
+    <TouchableOpacity
+      style={[
+        styles.featuredCard,
+        { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+      ]}
+    >
+      <Image
+        source={{ uri: item.image }}
+        style={styles.featuredImage}
+      />
+      <View style={styles.featuredInfo}>
+        <Text style={[
+          styles.featuredName,
+          { color: isDark ? '#fff' : '#000' }
+        ]}>{item.name}</Text>
+        <Text style={styles.featuredScientific}>{item.scientificName}</Text>
+        <View style={styles.featuredCategory}>
+          <MaterialCommunityIcons name="tag" size={16} color="#2E7D32" />
+          <Text style={styles.categoryLabel}>{item.category}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={[
+      styles.container,
+      { backgroundColor: isDark ? '#121212' : '#fff' }
+    ]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Explore</Text>
-        <TouchableOpacity style={styles.mapButton}>
-          <Ionicons name="map" size={24} color="#2196F3" />
+        <Text style={[
+          styles.title,
+          { color: isDark ? '#fff' : '#000' }
+        ]}>Explore</Text>
+        <TouchableOpacity style={styles.scanButton}>
+          <MaterialCommunityIcons name="camera" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#666" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search species, categories..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#666"
-          />
-        </View>
+      <View style={[
+        styles.searchContainer,
+        { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+      ]}>
+        <MaterialCommunityIcons
+          name="magnify"
+          size={24}
+          color={isDark ? '#aaa' : '#666'}
+        />
+        <TextInput
+          style={[
+            styles.searchInput,
+            { color: isDark ? '#fff' : '#000' }
+          ]}
+          placeholder="Search species..."
+          placeholderTextColor={isDark ? '#aaa' : '#666'}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Categories</Text>
-        <View style={styles.categoriesGrid}>
-          {categories.map((category) => (
-            <TouchableOpacity
-              key={category.id}
-              style={styles.categoryCard}
-              onPress={() => router.push({
-                pathname: '/category-details',
-                params: { category: category.name }
-              })}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.section}>
+          <Text style={[
+            styles.sectionTitle,
+            { color: isDark ? '#fff' : '#000' }
+          ]}>Categories</Text>
+          <FlatList
+            data={categories}
+            renderItem={renderCategoryItem}
+            keyExtractor={item => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesList}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[
+            styles.sectionTitle,
+            { color: isDark ? '#fff' : '#000' }
+          ]}>Featured Species</Text>
+          {featuredSpecies.map(item => (
+            <Link
+              key={item.id}
+              href={{
+                pathname: "/species-details",
+                params: { id: item.id }
+              }}
+              asChild
             >
-              <View style={styles.categoryIcon}>
-                <MaterialCommunityIcons name={category.icon} size={32} color="#2196F3" />
-              </View>
-              <Text style={styles.categoryName}>{category.name}</Text>
-              <Text style={styles.categoryCount}>{category.count} species</Text>
-            </TouchableOpacity>
+              {renderFeaturedItem({ item })}
+            </Link>
           ))}
         </View>
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Featured Species</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAllButton}>See All</Text>
-          </TouchableOpacity>
-        </View>
-        {featuredSpecies.map((species) => (
-          <TouchableOpacity
-            key={species.id}
-            style={styles.speciesCard}
-            onPress={() => router.push({
-              pathname: '/species-details',
-              params: { species: species.name }
-            })}
-          >
-            <Image source={{ uri: species.imageUri }} style={styles.speciesImage} />
-            <View style={styles.speciesInfo}>
-              <Text style={styles.speciesName}>{species.name}</Text>
-              <Text style={styles.speciesScientific}>{species.scientificName}</Text>
-              <View style={styles.speciesMetadata}>
-                <View style={styles.metadataItem}>
-                  <MaterialCommunityIcons name="tag" size={16} color="#666" />
-                  <Text style={styles.metadataText}>{species.category}</Text>
-                </View>
-                <View style={styles.metadataItem}>
-                  <Ionicons name="location" size={16} color="#666" />
-                  <Text style={styles.metadataText}>{species.distance}</Text>
-                </View>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Nearby Sightings</Text>
-        <TouchableOpacity style={styles.mapPreview}>
-          <Image
-            source={{ uri: 'https://example.com/map-preview.jpg' }}
-            style={styles.mapImage}
-          />
-          <View style={styles.mapOverlay}>
-            <Text style={styles.mapText}>View Map</Text>
-            <Ionicons name="arrow-forward" size={20} color="#fff" />
-          </View>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    paddingTop: 60,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  mapButton: {
-    padding: 8,
-  },
-  searchContainer: {
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  searchBar: {
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  scanButton: {
+    backgroundColor: '#2E7D32',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    height: 44,
+    marginHorizontal: 20,
+    paddingHorizontal: 16,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 24,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 12,
     fontSize: 16,
-    color: '#000',
   },
   section: {
-    padding: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
+    fontWeight: '600',
+    marginBottom: 16,
+    paddingHorizontal: 20,
   },
-  seeAllButton: {
-    color: '#2196F3',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+  categoriesList: {
+    paddingHorizontal: 20,
+    gap: 12,
   },
   categoryCard: {
-    width: '48%',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  categoryIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#E3F2FD',
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+    padding: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginRight: 12,
   },
   categoryName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 8,
+    textAlign: 'center',
   },
   categoryCount: {
     fontSize: 12,
-    color: '#666',
+    color: '#2E7D32',
+    marginTop: 4,
   },
-  speciesCard: {
-    flexDirection: 'row',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    marginBottom: 10,
+  featuredCard: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderRadius: 20,
     overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  speciesImage: {
-    width: 100,
-    height: 100,
+  featuredImage: {
+    width: '100%',
+    height: 200,
   },
-  speciesInfo: {
-    flex: 1,
-    padding: 15,
+  featuredInfo: {
+    padding: 16,
   },
-  speciesName: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  featuredName: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
   },
-  speciesScientific: {
+  featuredScientific: {
     fontSize: 14,
-    color: '#666',
+    color: '#2E7D32',
     fontStyle: 'italic',
     marginBottom: 8,
   },
-  speciesMetadata: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  metadataItem: {
+  featuredCategory: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  metadataText: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 4,
+  categoryLabel: {
+    marginLeft: 6,
+    color: '#2E7D32',
+    fontSize: 14,
   },
-  mapPreview: {
-    height: 150,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  mapImage: {
-    width: '100%',
-    height: '100%',
-  },
-  mapOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-  },
-  mapText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+}); 

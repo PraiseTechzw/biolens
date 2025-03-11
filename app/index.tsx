@@ -34,14 +34,14 @@ export default function SplashScreen() {
         if (!hasLaunched) {
           router.replace('/onboarding');
         } else if (!isAuthenticated) {
-          router.replace('/auth');
+          router.replace('/auth/sign-up');
         } else {
           router.replace('/(tabs)');
         }
       }, 2500);
     } catch (error) {
       console.error('Error checking first launch:', error);
-      router.replace('/auth');
+      router.replace('/auth/sign-up');
     }
   };
 

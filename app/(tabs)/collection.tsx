@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, TextInput, RefreshControl, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, TextInput, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 
@@ -22,6 +22,8 @@ export default function CollectionScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<SavedSpecies['category'] | 'all'>('all');
   const [refreshing, setRefreshing] = useState(false);
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const categories: { id: SavedSpecies['category'] | 'all'; icon: string; label: string }[] = [
     { id: 'all', icon: 'apps', label: 'All' },
@@ -77,108 +79,157 @@ export default function CollectionScreen() {
   });
 
   const renderGridItem = ({ item }: { item: SavedSpecies }) => (
-    <TouchableOpacity
-      style={styles.gridItem}
-      onPress={() => router.push({
-        pathname: '/species-details',
-        params: { species: item.name, imageUri: item.imageUri }
-      })}
+    <Link
+      href={{
+        pathname: "/species-details",
+        params: { id: item.id }
+      }}
+      asChild
     >
-      <Image source={{ uri: item.imageUri }} style={styles.gridImage} />
-      <View style={styles.gridOverlay}>
-        <MaterialCommunityIcons 
-          name={categories.find(c => c.id === item.category)?.icon || 'help'} 
-          size={20} 
-          color="#fff" 
-        />
-      </View>
-      <View style={styles.gridInfo}>
-        <Text style={styles.gridName} numberOfLines={1}>{item.name}</Text>
-        <View style={styles.gridMetadata}>
-          <Text style={styles.gridDate}>{item.date}</Text>
-          {item.isFavorite && (
-            <Ionicons name="heart" size={16} color="#FF4081" />
-          )}
+      <TouchableOpacity
+        style={[
+          styles.gridItem,
+          { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+        ]}
+      >
+        <Image source={{ uri: item.imageUri }} style={styles.gridImage} />
+        <View style={styles.gridOverlay}>
+          <MaterialCommunityIcons 
+            name={categories.find(c => c.id === item.category)?.icon || 'help'} 
+            size={20} 
+            color={isDark ? '#fff' : '#000'} 
+          />
         </View>
-      </View>
-    </TouchableOpacity>
+        <View style={styles.gridInfo}>
+          <Text
+            style={[
+              styles.gridName,
+              { color: isDark ? '#fff' : '#000' }
+            ]}
+            numberOfLines={1}
+          >
+            {item.name}
+          </Text>
+          <View style={styles.gridMetadata}>
+            <Text style={styles.gridDate}>{item.date}</Text>
+            {item.isFavorite && (
+              <MaterialCommunityIcons
+                name="heart"
+                size={16}
+                color="#FF5252"
+                style={styles.favoriteIcon}
+              />
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Link>
   );
 
   const renderListItem = ({ item }: { item: SavedSpecies }) => (
-    <TouchableOpacity
-      style={styles.listItem}
-      onPress={() => router.push({
-        pathname: '/species-details',
-        params: { species: item.name, imageUri: item.imageUri }
-      })}
+    <Link
+      href={{
+        pathname: "/species-details",
+        params: { id: item.id }
+      }}
+      asChild
     >
-      <Image source={{ uri: item.imageUri }} style={styles.listImage} />
-      <View style={styles.listInfo}>
-        <Text style={styles.listName}>{item.name}</Text>
-        <Text style={styles.listScientific}>{item.scientificName}</Text>
-        <View style={styles.listDetails}>
-          <View style={styles.listMetadata}>
-            <Ionicons name="location-outline" size={14} color="#666" />
-            <Text style={styles.listLocation}>{item.location}</Text>
-          </View>
-          <View style={styles.listMetadata}>
-            <Ionicons name="calendar-outline" size={14} color="#666" />
-            <Text style={styles.listDate}>{item.date}</Text>
-          </View>
-          <View style={styles.listMetadata}>
-            <MaterialCommunityIcons 
-              name={categories.find(c => c.id === item.category)?.icon || 'help'} 
-              size={14} 
-              color="#666" 
-            />
-            <Text style={styles.listCategory}>
-              {categories.find(c => c.id === item.category)?.label}
-            </Text>
+      <TouchableOpacity
+        style={[
+          styles.listItem,
+          { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+        ]}
+      >
+        <Image source={{ uri: item.imageUri }} style={styles.listImage} />
+        <View style={styles.listInfo}>
+          <Text
+            style={[
+              styles.listName,
+              { color: isDark ? '#fff' : '#000' }
+            ]}
+          >
+            {item.name}
+          </Text>
+          <Text style={styles.listScientific}>{item.scientificName}</Text>
+          <View style={styles.listDetails}>
+            <View style={styles.listMetadata}>
+              <Ionicons name="location-outline" size={14} color="#666" />
+              <Text style={styles.listLocation}>{item.location}</Text>
+            </View>
+            <View style={styles.listMetadata}>
+              <Ionicons name="calendar-outline" size={14} color="#666" />
+              <Text style={styles.listDate}>{item.date}</Text>
+            </View>
+            <View style={styles.listMetadata}>
+              <MaterialCommunityIcons 
+                name={categories.find(c => c.id === item.category)?.icon || 'help'} 
+                size={14} 
+                color="#666" 
+              />
+              <Text style={styles.listCategory}>
+                {categories.find(c => c.id === item.category)?.label}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-      <TouchableOpacity style={styles.favoriteButton}>
-        <Ionicons 
-          name={item.isFavorite ? "heart" : "heart-outline"} 
-          size={24} 
-          color={item.isFavorite ? "#FF4081" : "#666"} 
-        />
+        {item.isFavorite && (
+          <MaterialCommunityIcons
+            name="heart"
+            size={20}
+            color="#FF5252"
+            style={styles.favoriteIcon}
+          />
+        )}
       </TouchableOpacity>
-    </TouchableOpacity>
+    </Link>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      { backgroundColor: isDark ? '#121212' : '#fff' }
+    ]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Collection</Text>
+        <Text style={[
+          styles.headerTitle,
+          { color: isDark ? '#fff' : '#000' }
+        ]}>My Collection</Text>
         <TouchableOpacity
-          onPress={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
           style={styles.viewModeButton}
+          onPress={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
         >
-          <Ionicons
-            name={viewMode === 'grid' ? 'list' : 'grid'}
+          <MaterialCommunityIcons
+            name={viewMode === 'grid' ? 'view-list' : 'view-grid'}
             size={24}
-            color="#000"
+            color={isDark ? '#fff' : '#000'}
           />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#666" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search species..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#666"
-          />
-          {searchQuery !== '' && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={20} color="#666" />
-            </TouchableOpacity>
-          )}
-        </View>
+      <View style={[
+        styles.searchContainer,
+        { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+      ]}>
+        <MaterialCommunityIcons
+          name="magnify"
+          size={24}
+          color={isDark ? '#aaa' : '#666'}
+        />
+        <TextInput
+          style={[
+            styles.searchInput,
+            { color: isDark ? '#fff' : '#000' }
+          ]}
+          placeholder="Search species..."
+          placeholderTextColor={isDark ? '#aaa' : '#666'}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery !== '' && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={20} color="#666" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.filterContainer}>
@@ -244,7 +295,11 @@ export default function CollectionScreen() {
         key={viewMode}
         contentContainerStyle={styles.listContainer}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={isDark ? '#fff' : '#000'}
+          />
         }
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
@@ -259,7 +314,7 @@ export default function CollectionScreen() {
         style={styles.scanButton}
         onPress={() => router.push('/')}
       >
-        <Ionicons name="camera" size={24} color="#fff" />
+        <MaterialCommunityIcons name="camera" size={24} color="#fff" />
         <Text style={styles.scanButtonText}>Scan New Species</Text>
       </TouchableOpacity>
     </View>
@@ -269,7 +324,7 @@ export default function CollectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    paddingTop: 60,
   },
   header: {
     flexDirection: 'row',
@@ -286,22 +341,18 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   searchContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 15,
-  },
-  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    height: 44,
+    marginHorizontal: 20,
+    paddingHorizontal: 16,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 16,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 12,
     fontSize: 16,
-    color: '#000',
   },
   filterContainer: {
     marginBottom: 10,
@@ -450,9 +501,10 @@ const styles = StyleSheet.create({
     color: '#666',
     marginLeft: 4,
   },
-  favoriteButton: {
-    padding: 15,
-    justifyContent: 'center',
+  favoriteIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
   },
   scanButton: {
     flexDirection: 'row',
