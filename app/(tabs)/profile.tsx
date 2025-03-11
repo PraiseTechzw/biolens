@@ -1,295 +1,410 @@
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  useColorScheme,
+  Switch,
+} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface UserStats {
   speciesIdentified: number;
-  achievements: number;
   contributions: number;
   accuracy: number;
+  streak: number;
 }
 
 interface Achievement {
-  id: string;
+  id: number;
   title: string;
   description: string;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  icon: string;
   date: string;
 }
 
-type MenuItem = {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  route: string;
+const userStats: UserStats = {
+  speciesIdentified: 127,
+  contributions: 45,
+  accuracy: 92,
+  streak: 7,
 };
+
+const recentAchievements: Achievement[] = [
+  {
+    id: 1,
+    title: "Early Bird",
+    description: "Complete 5 identifications before 9 AM",
+    icon: "weather-sunny",
+    date: "2024-03-10",
+  },
+  {
+    id: 2,
+    title: "Tree Expert",
+    description: "Successfully identify 50 different tree species",
+    icon: "tree",
+    date: "2024-03-08",
+  },
+];
+
+const settingsOptions = [
+  {
+    id: 'notifications',
+    title: 'Push Notifications',
+    icon: 'bell-outline',
+    type: 'toggle',
+  },
+  {
+    id: 'darkMode',
+    title: 'Dark Mode',
+    icon: 'theme-light-dark',
+    type: 'toggle',
+  },
+  {
+    id: 'language',
+    title: 'Language',
+    icon: 'translate',
+    type: 'navigate',
+    value: 'English',
+  },
+  {
+    id: 'units',
+    title: 'Measurement Units',
+    icon: 'ruler',
+    type: 'navigate',
+    value: 'Metric',
+  },
+  {
+    id: 'privacy',
+    title: 'Privacy Settings',
+    icon: 'shield-check-outline',
+    type: 'navigate',
+  },
+  {
+    id: 'about',
+    title: 'About BioLens',
+    icon: 'information-outline',
+    type: 'navigate',
+  },
+];
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
-  const userStats: UserStats = {
-    speciesIdentified: 47,
-    achievements: 12,
-    contributions: 25,
-    accuracy: 92,
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('isAuthenticated');
+      router.replace('/auth/sign-in');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
-  const recentAchievements: Achievement[] = [
-    {
-      id: '1',
-      title: 'Bird Expert',
-      description: 'Identified 10 different bird species',
-      icon: 'bird',
-      date: '2024-03-15',
-    },
-    {
-      id: '2',
-      title: 'Early Bird',
-      description: 'Made 5 identifications before 8 AM',
-      icon: 'weather-sunny',
-      date: '2024-03-10',
-    },
-  ];
-
-  const menuItems: MenuItem[] = [
-    { icon: 'settings-outline', title: 'Settings', route: '/settings' },
-    { icon: 'notifications-outline', title: 'Notifications', route: '/notifications' },
-    { icon: 'heart-outline', title: 'Favorites', route: '/favorites' },
-    { icon: 'share-social-outline', title: 'Share App', route: '/share' },
-    { icon: 'help-circle-outline', title: 'Help & Support', route: '/help' },
-    { icon: 'information-circle-outline', title: 'About', route: '/about' },
-  ];
-
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.profileInfo}>
-          <Image
-            source={{ uri: 'https://example.com/profile.jpg' }}
-            style={styles.profileImage}
-          />
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>John Doe</Text>
-            <Text style={styles.userLevel}>Advanced Explorer</Text>
-            <View style={styles.badgeContainer}>
-              <MaterialCommunityIcons name="shield-check" size={16} color="#4CAF50" />
-              <Text style={styles.verifiedText}>Verified Contributor</Text>
+    <View style={[
+      styles.container,
+      { backgroundColor: isDark ? '#121212' : '#fff' }
+    ]}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View style={styles.profileInfo}>
+            <Image
+              source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde' }}
+              style={styles.avatar}
+            />
+            <View>
+              <Text style={[
+                styles.name,
+                { color: isDark ? '#fff' : '#000' }
+              ]}>John Doe</Text>
+              <Text style={styles.email}>john.doe@example.com</Text>
             </View>
           </View>
-        </View>
-        <TouchableOpacity style={styles.editButton}>
-          <Ionicons name="pencil" size={20} color="#2196F3" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{userStats.speciesIdentified}</Text>
-          <Text style={styles.statLabel}>Species</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{userStats.achievements}</Text>
-          <Text style={styles.statLabel}>Achievements</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{userStats.contributions}</Text>
-          <Text style={styles.statLabel}>Contributions</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{userStats.accuracy}%</Text>
-          <Text style={styles.statLabel}>Accuracy</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Achievements</Text>
-        {recentAchievements.map((achievement) => (
-          <View key={achievement.id} style={styles.achievementCard}>
-            <View style={styles.achievementIcon}>
-              <MaterialCommunityIcons name={achievement.icon} size={24} color="#2196F3" />
-            </View>
-            <View style={styles.achievementInfo}>
-              <Text style={styles.achievementTitle}>{achievement.title}</Text>
-              <Text style={styles.achievementDescription}>{achievement.description}</Text>
-              <Text style={styles.achievementDate}>{achievement.date}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Menu</Text>
-        {menuItems.map((item, index) => (
           <TouchableOpacity
-            key={index}
-            style={styles.menuItem}
-            onPress={() => router.push(item.route)}
+            style={styles.editButton}
+            onPress={() => router.push('/(tabs)/profile/edit')}
           >
-            <View style={styles.menuItemLeft}>
-              <Ionicons name={item.icon} size={24} color="#666" />
-              <Text style={styles.menuItemText}>{item.title}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color="#666" />
+            <MaterialCommunityIcons name="pencil" size={20} color="#2E7D32" />
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
 
-      <TouchableOpacity style={styles.logoutButton}>
-        <Ionicons name="log-out-outline" size={24} color="#FF5252" />
-        <Text style={styles.logoutText}>Log Out</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="leaf" size={24} color="#2E7D32" />
+            <Text style={[
+              styles.statNumber,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>{userStats.speciesIdentified}</Text>
+            <Text style={styles.statLabel}>Species{'\n'}Identified</Text>
+          </View>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="database" size={24} color="#2E7D32" />
+            <Text style={[
+              styles.statNumber,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>{userStats.contributions}</Text>
+            <Text style={styles.statLabel}>Contributions{'\n'}Made</Text>
+          </View>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="check-circle" size={24} color="#2E7D32" />
+            <Text style={[
+              styles.statNumber,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>{userStats.accuracy}%</Text>
+            <Text style={styles.statLabel}>Identification{'\n'}Accuracy</Text>
+          </View>
+          <View style={styles.statCard}>
+            <MaterialCommunityIcons name="fire" size={24} color="#2E7D32" />
+            <Text style={[
+              styles.statNumber,
+              { color: isDark ? '#fff' : '#000' }
+            ]}>{userStats.streak}</Text>
+            <Text style={styles.statLabel}>Day{'\n'}Streak</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[
+            styles.sectionTitle,
+            { color: isDark ? '#fff' : '#000' }
+          ]}>Recent Achievements</Text>
+          {recentAchievements.map(achievement => (
+            <View
+              key={achievement.id}
+              style={[
+                styles.achievementCard,
+                { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={achievement.icon as any}
+                size={32}
+                color="#2E7D32"
+              />
+              <View style={styles.achievementInfo}>
+                <Text style={[
+                  styles.achievementTitle,
+                  { color: isDark ? '#fff' : '#000' }
+                ]}>{achievement.title}</Text>
+                <Text style={styles.achievementDescription}>{achievement.description}</Text>
+                <Text style={styles.achievementDate}>
+                  {new Date(achievement.date).toLocaleDateString()}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[
+            styles.sectionTitle,
+            { color: isDark ? '#fff' : '#000' }
+          ]}>Settings</Text>
+          {settingsOptions.map(option => (
+            <TouchableOpacity
+              key={option.id}
+              style={[
+                styles.settingItem,
+                { backgroundColor: isDark ? '#1E1E1E' : '#F5F5F5' }
+              ]}
+              onPress={() => {
+                if (option.type === 'navigate') {
+                  router.push(`/(tabs)/profile/settings/${option.id}`);
+                }
+              }}
+            >
+              <View style={styles.settingInfo}>
+                <MaterialCommunityIcons
+                  name={option.icon as any}
+                  size={24}
+                  color="#2E7D32"
+                />
+                <Text style={[
+                  styles.settingTitle,
+                  { color: isDark ? '#fff' : '#000' }
+                ]}>{option.title}</Text>
+              </View>
+              {option.type === 'toggle' ? (
+                <Switch
+                  value={false}
+                  onValueChange={() => {}}
+                  trackColor={{ false: '#767577', true: '#81c784' }}
+                  thumbColor={false ? '#2E7D32' : '#f4f3f4'}
+                />
+              ) : (
+                <View style={styles.settingAction}>
+                  {option.value && (
+                    <Text style={styles.settingValue}>{option.value}</Text>
+                  )}
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={24}
+                    color={isDark ? '#aaa' : '#666'}
+                  />
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
+          <MaterialCommunityIcons name="logout" size={24} color="#FF5252" />
+          <Text style={styles.logoutText}>Log Out</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    paddingTop: 60,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    paddingTop: 60,
+    paddingHorizontal: 20,
+    marginBottom: 24,
   },
   profileInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 16,
   },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 15,
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
-  userInfo: {
-    flex: 1,
+  name: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 4,
   },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  userLevel: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
-  },
-  badgeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  verifiedText: {
+  email: {
     fontSize: 14,
-    color: '#4CAF50',
-    marginLeft: 4,
+    color: '#2E7D32',
   },
   editButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 16,
     padding: 20,
-    backgroundColor: '#f5f5f5',
-    marginHorizontal: 20,
-    borderRadius: 10,
   },
-  statItem: {
+  statCard: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+    borderRadius: 16,
+    padding: 16,
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#2196F3',
+    marginVertical: 8,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    height: '100%',
-    backgroundColor: '#ddd',
+    color: '#2E7D32',
+    textAlign: 'center',
   },
   section: {
-    padding: 20,
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
+    fontWeight: '600',
+    marginBottom: 16,
+    paddingHorizontal: 20,
   },
   achievementCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  achievementIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#E3F2FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
+    marginHorizontal: 20,
+    marginBottom: 12,
+    padding: 16,
+    borderRadius: 16,
+    gap: 16,
   },
   achievementInfo: {
     flex: 1,
   },
   achievementTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    marginBottom: 4,
   },
   achievementDescription: {
     fontSize: 14,
     color: '#666',
-    marginTop: 2,
+    marginBottom: 4,
   },
   achievementDate: {
     fontSize: 12,
-    color: '#999',
-    marginTop: 4,
+    color: '#2E7D32',
   },
-  menuItem: {
+  settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginHorizontal: 20,
+    marginBottom: 12,
+    padding: 16,
+    borderRadius: 16,
   },
-  menuItemLeft: {
+  settingInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-  menuItemText: {
+  settingTitle: {
     fontSize: 16,
-    marginLeft: 15,
+    fontWeight: '500',
+  },
+  settingAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  settingValue: {
+    fontSize: 14,
+    color: '#666',
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
+    gap: 8,
     marginHorizontal: 20,
-    marginVertical: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFF3F3',
+    marginVertical: 24,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(244, 67, 54, 0.1)',
   },
   logoutText: {
     fontSize: 16,
+    fontWeight: '600',
     color: '#FF5252',
-    marginLeft: 10,
-    fontWeight: '500',
   },
 }); 
