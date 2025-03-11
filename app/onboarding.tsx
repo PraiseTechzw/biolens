@@ -6,7 +6,6 @@ import {
   FlatList,
   useWindowDimensions,
   TouchableOpacity,
-  Image,
   Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -18,22 +17,22 @@ const onboardingData = [
     id: '1',
     title: 'Welcome to BioLens',
     description: 'Your AI-powered companion for exploring and learning about nature.',
-    image: require('../assets/images/onboarding-1.png'),
     icon: 'leaf',
+    color: '#4CAF50',
   },
   {
     id: '2',
     title: 'Instant Species Recognition',
     description: 'Point your camera at any plant or animal to instantly identify it.',
-    image: require('../assets/images/onboarding-2.png'),
     icon: 'camera',
+    color: '#2196F3',
   },
   {
     id: '3',
     title: 'Learn & Explore',
     description: 'Access detailed information, fun facts, and conservation status.',
-    image: require('../assets/images/onboarding-3.png'),
     icon: 'book-open-variant',
+    color: '#FF9800',
   },
 ];
 
@@ -44,7 +43,7 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  const viewableItemsChanged = useRef(({ viewableItems }) => {
+  const viewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index: number }> }) => {
     if (viewableItems[0]) {
       setCurrentIndex(viewableItems[0].index);
     }
@@ -55,13 +54,111 @@ export default function OnboardingScreen() {
   const handleComplete = async () => {
     try {
       await AsyncStorage.setItem('hasLaunched', 'true');
-      router.replace('/auth');
+      router.replace('/');
     } catch (error) {
       console.error('Error saving first launch:', error);
     }
   };
+  // Generate visual for first slide - Nature theme
+  const NatureVisual = ({ color }: { color: string }) => (
+    <View style={styles.visualContainer}>
+      <View style={[styles.circle, { backgroundColor: `${color}20` }]}>
+        <View style={[styles.innerCircle, { backgroundColor: `${color}40` }]}>
+          <MaterialCommunityIcons name="leaf" size={80} color={color} />
+        </View>
+      </View>
+      <View style={styles.decorationContainer}>
+        {[...Array(5)].map((_, i) => (
+          <View 
+            key={i} 
+            style={[
+              styles.leafDecoration, 
+              { 
+                transform: [{ rotate: `${i * 72}deg` }],
+                backgroundColor: `${color}${20 + i * 10}`,
+                top: 20 + i * 15,
+                left: i % 2 === 0 ? -100 - i * 10 : 100 + i * 10,
+              }
+            ]} 
+          />
+        ))}
+      </View>
+    </View>
+  );
+  // Generate visual for second slide - Camera recognition
+  const CameraVisual = ({ color }: { color: string }) => (
+    <View style={styles.visualContainer}>
+      <View style={[styles.cameraBody, { backgroundColor: `${color}30` }]}>
+        <View style={[styles.cameraLens, { borderColor: color }]}>
+          <View style={[styles.innerLens, { backgroundColor: `${color}20` }]}>
+            <View style={[styles.lensReflection, { backgroundColor: `${color}60` }]} />
+          </View>
+        </View>
+        <View style={[styles.cameraButton, { backgroundColor: color }]} />
+        <View style={styles.scanLines}>
+          {[...Array(8)].map((_, i) => (
+            <Animated.View 
+              key={i} 
+              style={[
+                styles.scanLine, 
+                { 
+                  backgroundColor: `${color}${40 + i * 5}`,
+                  top: 10 + i * 20,
+                  width: '80%',
+                  opacity: 0.7 - i * 0.08
+                }
+              ]} 
+            />
+          ))}
+        </View>
+      </View>
+    </View>
+  );
 
-  const renderItem = ({ item, index }) => {
+  // Generate visual for third slide - Learning/Information
+  const LearningVisual = ({ color }: { color: string }) => (
+    <View style={styles.visualContainer}>
+      <View style={[styles.bookContainer, { backgroundColor: `${color}10` }]}>
+        <View style={[styles.bookCover, { backgroundColor: color }]}>
+          <MaterialCommunityIcons name="book-open-variant" size={50} color="white" />
+        </View>
+        <View style={styles.bookPages}>
+          {[...Array(5)].map((_, i) => (
+            <View 
+              key={i} 
+              style={[
+                styles.bookPage, 
+                { 
+                  backgroundColor: '#fff',
+                  right: i * 5,
+                  height: 180 - i * 5,
+                  transform: [{ rotate: `${i * 2}deg` }]
+                }
+              ]} 
+            />
+          ))}
+        </View>
+        <View style={styles.infoElements}>
+          {[...Array(3)].map((_, i) => (
+            <View key={i} style={styles.infoRow}>
+              <View style={[styles.infoIcon, { backgroundColor: `${color}${50 + i * 10}` }]} />
+              <View style={[styles.infoLine, { backgroundColor: `${color}${30 + i * 10}` }]} />
+            </View>
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+
+  type OnboardingItem = {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    color: string;
+  };
+
+  const renderItem = ({ item, index }: { item: OnboardingItem; index: number }) => {
     const inputRange = [
       (index - 1) * width,
       index * width,
@@ -73,15 +170,24 @@ export default function OnboardingScreen() {
       outputRange: [0.8, 1, 0.8],
     });
 
+    let Visual;
+    if (index === 0) {
+      Visual = NatureVisual;
+    } else if (index === 1) {
+      Visual = CameraVisual;
+    } else {
+      Visual = LearningVisual;
+    }
+
     return (
       <View style={[styles.slide, { width }]}>
-        <Animated.View style={[styles.imageContainer, { transform: [{ scale }] }]}>
-          <Image source={item.image} style={styles.image} resizeMode="contain" />
+        <Animated.View style={[styles.visualWrapper, { transform: [{ scale }] }]}>
+          <Visual color={item.color} />
         </Animated.View>
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name={item.icon} size={40} color="#2E7D32" />
+          <MaterialCommunityIcons name={item.icon as any} size={40} color={item.color} />
         </View>
-        <Text style={styles.title}>{item.title}</Text>
+        <Text style={[styles.title, { color: item.color }]}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
       </View>
     );
@@ -102,13 +208,18 @@ export default function OnboardingScreen() {
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
           { useNativeDriver: false }
         )}
-        onViewableItemsChanged={viewableItemsChanged}
+        onViewableItemsChanged={(info) => {
+          const { viewableItems } = info;
+          if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+            setCurrentIndex(viewableItems[0].index);
+          }
+        }}
         viewabilityConfig={viewConfig}
       />
 
       <View style={styles.footer}>
         <View style={styles.pagination}>
-          {onboardingData.map((_, index) => {
+          {onboardingData.map((item, index) => {
             const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
             const dotWidth = scrollX.interpolate({
               inputRange,
@@ -126,7 +237,7 @@ export default function OnboardingScreen() {
                 key={index.toString()}
                 style={[
                   styles.dot,
-                  { width: dotWidth, opacity },
+                  { width: dotWidth, opacity, backgroundColor: item.color },
                   currentIndex === index && styles.dotActive,
                 ]}
               />
@@ -135,7 +246,7 @@ export default function OnboardingScreen() {
         </View>
 
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, { backgroundColor: onboardingData[currentIndex].color }]}
           onPress={handleComplete}
         >
           <Text style={styles.buttonText}>
@@ -158,18 +269,155 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
-  imageContainer: {
-    flex: 0.7,
-    justifyContent: 'center',
-  },
-  image: {
-    width: 300,
+  visualWrapper: {
     height: 300,
+    width: 300,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  visualContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  // Nature visual styles
+  circle: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  innerCircle: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  decorationContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  leafDecoration: {
+    position: 'absolute',
+    width: 40,
+    height: 80,
+    borderRadius: 20,
+  },
+  // Camera visual styles
+  cameraBody: {
+    width: 220,
+    height: 180,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  cameraLens: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  innerLens: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lensReflection: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    top: 10,
+    right: 10,
+  },
+  cameraButton: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    top: 20,
+    right: 30,
+  },
+  scanLines: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scanLine: {
+    position: 'absolute',
+    height: 2,
+    borderRadius: 1,
+  },
+  // Learning visual styles
+  bookContainer: {
+    width: 220,
+    height: 220,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  bookCover: {
+    position: 'absolute',
+    width: 120,
+    height: 180,
+    borderRadius: 10,
+    left: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  bookPages: {
+    position: 'absolute',
+    left: 40,
+    zIndex: 5,
+  },
+  bookPage: {
+    position: 'absolute',
+    width: 120,
+    borderRadius: 5,
+  },
+  infoElements: {
+    position: 'absolute',
+    right: 30,
+    top: 60,
+    width: 100,
+    height: 100,
+    justifyContent: 'space-around',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  infoIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  infoLine: {
+    height: 8,
+    width: 60,
+    borderRadius: 4,
   },
   iconContainer: {
     width: 80,
     height: 80,
-    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -178,7 +426,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2E7D32',
     textAlign: 'center',
     marginBottom: 10,
   },
@@ -199,14 +446,12 @@ const styles = StyleSheet.create({
   dot: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2E7D32',
     marginHorizontal: 4,
   },
   dotActive: {
     backgroundColor: '#2E7D32',
   },
   button: {
-    backgroundColor: '#2E7D32',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -216,4 +461,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

@@ -61,21 +61,6 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Scan',
-          tabBarIcon: ({ focused, color }) => (
-            <View style={{ alignItems: 'center' }}>
-              <MaterialCommunityIcons
-                name={focused ? 'camera' : 'camera-outline'}
-                size={24}
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
