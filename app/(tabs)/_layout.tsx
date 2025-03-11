@@ -1,6 +1,5 @@
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { View } from 'react-native';
 
 export default function TabLayout() {
   return (
@@ -11,15 +10,6 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopColor: '#eee',
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
         },
         headerShown: false,
       }}
@@ -27,9 +17,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Discover',
+          title: 'Scan',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="compass" size={size} color={color} />
+            <MaterialCommunityIcons name="camera" size={size} color={color} />
           ),
         }}
       />
@@ -43,42 +33,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="scan"
-        options={{
-          title: 'Scan',
-          tabBarIcon: ({ color, size }) => (
-            <View style={{
-              backgroundColor: '#2196F3',
-              width: 60,
-              height: 60,
-              borderRadius: 30,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: -30,
-              borderWidth: 4,
-              borderColor: '#fff',
-            }}>
-              <MaterialCommunityIcons name="camera" size={32} color="#fff" />
-            </View>
-          ),
-          tabBarLabel: () => null,
-        }}
-      />
-      <Tabs.Screen
         name="learn"
         options={{
           title: 'Learn',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="school" size={size} color={color} />
+            <Ionicons name="school" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="settings"
         options={{
-          title: 'Profile',
+          title: 'Settings',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-circle" size={size} color={color} />
+            <Ionicons name="settings-outline" size={size} color={color} />
           ),
         }}
       />
