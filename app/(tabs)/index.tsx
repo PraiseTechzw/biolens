@@ -1,74 +1,134 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { Camera } from 'expo-camera';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { Link } from 'expo-router';
 
 export default function HomeScreen() {
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [camera, setCamera] = useState<Camera | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [confidence, setConfidence] = useState(0);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  const handleCapture = async () => {
+    if (!camera) return;
+    setIsScanning(true);
+    // Simulate AI processing
+    setTimeout(() => {
+      setIsScanning(false);
+      setConfidence(95);
+      // Navigate to results screen
+    }, 2000);
+  };
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Camera
+        style={styles.camera}
+        ref={(ref) => setCamera(ref)}
+        type={Camera.Constants.Type.back}
+      >
+        <View style={styles.header}>
+          <Link href="/settings" asChild>
+            <TouchableOpacity style={styles.headerButton}>
+              <Ionicons name="settings-outline" size={24} color="white" />
+            </TouchableOpacity>
+          </Link>
+          <Link href="/profile" asChild>
+            <TouchableOpacity style={styles.headerButton}>
+              <MaterialIcons name="account-circle" size={24} color="white" />
+            </TouchableOpacity>
+          </Link>
+        </View>
+
+        {isScanning && (
+          <View style={styles.scanningOverlay}>
+            <ActivityIndicator size="large" color="#ffffff" />
+            <Text style={styles.scanningText}>Analyzing...</Text>
+          </View>
+        )}
+
+        <View style={styles.boundingBox} />
+
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.captureButton}
+            onPress={handleCapture}
+            disabled={isScanning}
+          >
+            <View style={styles.captureButtonInner} />
+          </TouchableOpacity>
+        </View>
+      </Camera>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+  },
+  camera: {
+    flex: 1,
+  },
+  header: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
+    padding: 20,
+    paddingTop: 60,
+  },
+  headerButton: {
+    marginLeft: 15,
+  },
+  scanningOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scanningText: {
+    color: 'white',
+    marginTop: 10,
+    fontSize: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  boundingBox: {
+    flex: 1,
+    margin: 40,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.5)',
+    borderRadius: 10,
+  },
+  footer: {
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureButton: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureButtonInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'white',
   },
 });
