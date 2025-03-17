@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import '../models/species.dart';
 
 class RecentIdentificationCard extends StatelessWidget {
@@ -30,9 +31,9 @@ class RecentIdentificationCard extends StatelessWidget {
               Stack(
                 children: [
                   Image.file(
-                    identification.imageUrl.startsWith('/')
+                    File(identification.imageUrl.startsWith('/')
                         ? identification.imageUrl.replaceFirst('/', '')
-                        : identification.imageUrl,
+                        : identification.imageUrl),
                     height: 100,
                     width: double.infinity,
                     fit: BoxFit.cover,
