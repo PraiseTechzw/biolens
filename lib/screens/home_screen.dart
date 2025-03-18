@@ -65,8 +65,8 @@ class DashboardScreen extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.7),
+                      const Color(0xFF2E7D32), // Deep green
+                      const Color(0xFF1B5E20).withOpacity(0.8), // Darker green
                     ],
                   ),
                 ),
@@ -108,58 +108,237 @@ class DashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Quick Actions',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          context,
-                          'Capture',
-                          Icons.camera_alt,
-                          Colors.green,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ScanScreen()),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildQuickActionCard(
-                          context,
-                          'Upload',
-                          Icons.photo_library,
-                          Colors.blue,
-                          () {
-                            // Implement image upload
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildFlyOfTheDay(context),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Recent Activity',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildRecentActivityList(),
+                  _buildQuickActions(context),
+                  const SizedBox(height: 24),
+                  _buildTrendingIdentifications(context),
+                  const SizedBox(height: 24),
+                  _buildRecentActivity(context),
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFlyOfTheDay(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2E7D32).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.lightbulb,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Fly of the Day',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Tsetse Fly (Glossina)',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Did you know? Tsetse flies are unique among insects as they give birth to live young instead of laying eggs.',
+              style: TextStyle(
+                color: Colors.grey,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Quick Actions',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                context,
+                'Capture',
+                Icons.camera_alt,
+                const Color(0xFF2E7D32),
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ScanScreen()),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildQuickActionCard(
+                context,
+                'Upload',
+                Icons.photo_library,
+                const Color(0xFF1B5E20),
+                () {
+                  // Implement image upload
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTrendingIdentifications(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Trending Identifications',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 5,
+            itemBuilder: (context, index) {
+              return Container(
+                width: 160,
+                margin: const EdgeInsets.only(right: 16),
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2E7D32).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.bug_report,
+                            color: Color(0xFF2E7D32),
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tsetse Fly ${index + 1}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${(index + 1) * 10}% match',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentActivity(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Recent Activity',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 3,
+          itemBuilder: (context, index) {
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2E7D32).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.image,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+                title: Text('Scan ${index + 1}'),
+                subtitle: Text('Species identified: Tsetse Fly ${index + 1}'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  // Navigate to scan details
+                },
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -207,31 +386,6 @@ class DashboardScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildRecentActivityList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 3,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Colors.grey,
-              child: Icon(Icons.image, color: Colors.white),
-            ),
-            title: Text('Scan ${index + 1}'),
-            subtitle: Text('Species identified: Tsetse Fly ${index + 1}'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Navigate to scan details
-            },
-          ),
-        );
-      },
     );
   }
 } 
