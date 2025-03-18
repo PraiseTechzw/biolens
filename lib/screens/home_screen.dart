@@ -51,83 +51,119 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Afro-Dip'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () {
-              // Navigate to history screen
-            },
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Welcome to Afro-Dip',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text('Afro-Dip'),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withOpacity(0.7),
+                    ],
+                  ),
+                ),
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.bug_report,
+                        size: 60,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Identify Fly Species',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.history),
+                onPressed: () {
+                  // Navigate to history screen
+                },
+              ),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDashboardCard(
-                    context,
-                    'Capture Fly Image',
-                    Icons.camera_alt,
-                    Colors.green,
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ScanScreen()),
+                  const Text(
+                    'Quick Actions',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  _buildDashboardCard(
-                    context,
-                    'Upload Image',
-                    Icons.photo_library,
-                    Colors.blue,
-                    () {
-                      // Implement image upload
-                    },
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          context,
+                          'Capture',
+                          Icons.camera_alt,
+                          Colors.green,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ScanScreen()),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildQuickActionCard(
+                          context,
+                          'Upload',
+                          Icons.photo_library,
+                          Colors.blue,
+                          () {
+                            // Implement image upload
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                  _buildDashboardCard(
-                    context,
-                    'View Past Results',
-                    Icons.history,
-                    Colors.orange,
-                    () {
-                      // Navigate to history
-                    },
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Recent Activity',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  _buildDashboardCard(
-                    context,
-                    'Species Info',
-                    Icons.info,
-                    Colors.purple,
-                    () {
-                      // Navigate to species info
-                    },
-                  ),
+                  const SizedBox(height: 16),
+                  _buildRecentActivityList(),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDashboardCard(
+  Widget _buildQuickActionCard(
     BuildContext context,
     String title,
     IconData icon,
@@ -142,26 +178,60 @@ class DashboardScreen extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 48,
-              color: color,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: color,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRecentActivityList() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: const CircleAvatar(
+              backgroundColor: Colors.grey,
+              child: Icon(Icons.image, color: Colors.white),
+            ),
+            title: Text('Scan ${index + 1}'),
+            subtitle: Text('Species identified: Tsetse Fly ${index + 1}'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              // Navigate to scan details
+            },
+          ),
+        );
+      },
     );
   }
 } 
