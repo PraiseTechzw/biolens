@@ -12,12 +12,18 @@ import 'package:provider/provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
   await Firebase.initializeApp();
+
+  // Configure Firebase Auth for Android
+  await firebase.FirebaseAuth.instance.setSettings(
+    appVerificationDisabledForTesting: true, // Only for development
+  );
 
   // Initialize Firestore with persistence enabled
   FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
