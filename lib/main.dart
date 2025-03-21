@@ -11,12 +11,16 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
   await Firebase.initializeApp();
+
+  // Initialize Firestore with persistence enabled
+  await FirebaseFirestore.instance.enablePersistence();
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
