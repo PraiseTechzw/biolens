@@ -31,10 +31,9 @@ class FirebaseService {
   Future<void> initializeFirebase() async {
     await Firebase.initializeApp();
     
-    // Set Firestore settings with persistence and synchronization
+    // Set Firestore settings with persistence
     _firestore.settings = const Settings(
       persistenceEnabled: true,
-      synchronizeTabs: true,
       cacheSizeBytes: 100 * 1024 * 1024, // 100MB
     );
     
