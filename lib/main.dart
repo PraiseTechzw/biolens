@@ -20,7 +20,7 @@ void main() async {
   await Firebase.initializeApp();
 
   // Initialize Firestore with persistence enabled
-  await FirebaseFirestore.instance.enablePersistence();
+  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
 
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
