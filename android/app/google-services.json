@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "292100502271",
+    "project_id": "afro-dip",
+    "storage_bucket": "afro-dip.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292100502271:android:c6e3f352863bd4b50e52ca",
+        "android_client_info": {
+          "package_name": "zw.co.appixia.biolens.biolens"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCfOp_cuPjHwM5F4KhuOvPds6u9Dy92Pg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
